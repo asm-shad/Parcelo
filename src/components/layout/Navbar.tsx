@@ -1,5 +1,3 @@
-import NotificationMenu from "@/components/notification-menu";
-import UserMenu from "@/components/user-menu";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -14,13 +12,14 @@ import {
 } from "@/components/ui/popover";
 import Logo from "@/assets/icons/Logo.svg";
 import { ModeToggle } from "./ModeToggler";
+import { Link } from "react-router";
 
 // Navigation links array to be used in both desktop and mobile menus
 const navigationLinks = [
-  { href: "#", label: "Home" },
-  { href: "#", label: "Features" },
-  { href: "#", label: "Pricing" },
-  { href: "#", label: "About" },
+  { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/features", label: "Features" },
 ];
 
 export default function Navbar() {
@@ -43,8 +42,8 @@ export default function Navbar() {
                 <NavigationMenuList className="flex-col items-start gap-0 md:gap-2">
                   {navigationLinks.map((link, index) => (
                     <NavigationMenuItem key={index} className="w-full">
-                      <NavigationMenuLink href={link.href} className="py-1.5">
-                        {link.label}
+                      <NavigationMenuLink className="py-1.5">
+                        <Link to={link.href}>{link.label}</Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                   ))}
@@ -63,10 +62,10 @@ export default function Navbar() {
                 {navigationLinks.map((link, index) => (
                   <NavigationMenuItem key={index}>
                     <NavigationMenuLink
-                      href={link.href}
+                      asChild
                       className="text-muted-foreground hover:text-primary py-1.5 font-medium"
                     >
-                      {link.label}
+                      <Link to={link.href}>{link.label}</Link>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                 ))}
@@ -77,10 +76,9 @@ export default function Navbar() {
         {/* Right side */}
         <div className="flex items-center gap-4">
           <ModeToggle />
-          <div className="flex items-center gap-2">
-            <NotificationMenu />
-          </div>
-          <UserMenu />
+          <Button asChild className="text-foreground">
+            <Link to="/login">Login</Link>
+          </Button>
         </div>
       </div>
     </header>

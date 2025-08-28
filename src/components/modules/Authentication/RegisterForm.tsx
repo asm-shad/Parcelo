@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { useRegisterMutation } from "@/redux/features/auth/auth.api";
+import { useRegisterMutation } from "@/redux/features/auth/auth.api";
 import { toast } from "sonner";
 import Password from "@/components/ui/Password";
 
@@ -41,7 +41,7 @@ export function RegisterForm({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
-  // const [register] = useRegisterMutation();
+  const [register] = useRegisterMutation();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof registerSchema>>({
@@ -54,19 +54,18 @@ export function RegisterForm({
     },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSubmit = async (data: z.infer<typeof registerSchema>) => {
-    // const userInfo = {
-    //   name: data.name,
-    //   email: data.email,
-    //   password: data.password,
-    // };
+    const userInfo = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    };
 
     try {
-      // await register(userInfo).unwrap();
+      await register(userInfo).unwrap();
 
       toast.success("User created successfully");
-      navigate("/verify");
+      navigate("/verify", { state: data.email });
     } catch (error) {
       console.error(error);
     }

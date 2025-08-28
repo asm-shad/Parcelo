@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import config from "@/config";
 import { cn } from "@/lib/utils";
-// import { useLoginMutation } from "@/redux/features/auth/auth.api";
+import { useLoginMutation } from "@/redux/features/auth/auth.api";
 import { type FieldValues, type SubmitHandler, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -23,20 +23,20 @@ export function LoginForm({
   const form = useForm({
     //! For development only
     defaultValues: {
-      email: "mirhussainmurtaza@gmail.com",
-      password: "12345678",
+      email: "shadpixel01@gmail.com",
+      password: "Ointment@1",
     },
   });
-  // const [login] = useLoginMutation();
+  const [login] = useLoginMutation();
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     try {
-      // const res = await login(data).unwrap();
-      // if (res.success) {
-      //   toast.success("Logged in successfully");
-      //   navigate("/");
-      // }
+      const res = await login(data).unwrap();
+      if (res.success) {
+        toast.success("Logged in successfully");
+        navigate("/");
+      }
     } catch (err: unknown) {
-      console.error(err);
+      // console.error(err);
 
       if (typeof err === "object" && err !== null && "data" in err) {
         const errorData = (err as { data: { message?: string } }).data;

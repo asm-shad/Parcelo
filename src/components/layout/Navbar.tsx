@@ -78,9 +78,9 @@ export default function Navbar() {
 
           {/* Main nav */}
           <div className="flex items-center gap-6">
-            <a href="#" className="text-primary hover:text-primary/90">
+            <Link to="/" className="text-primary hover:text-primary/90">
               <img src={Logo} alt="Parcelo Logo" className="h-8 w-auto" />
-            </a>
+            </Link>
             <NavigationMenu className="max-md:hidden">
               <NavigationMenuList className="gap-2">
                 {navigationLinks.map((link, index) => (

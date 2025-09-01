@@ -1,5 +1,5 @@
 import Analytics from "@/pages/Admin/Analytics";
-import ParcelManagement from "@/pages/Admin/ParcelManagement";
+import ParcelManagement from "@/pages/Admin/AllParcels";
 import type { ISidebarItem } from "@/types";
 
 export const adminSidebarItems: ISidebarItem[] = [
@@ -21,14 +21,24 @@ export const adminSidebarItems: ISidebarItem[] = [
         url: "/admin/parcel",
         component: ParcelManagement,
       },
+      {
+        title: "Update Parcel",
+        url: "/admin/parcel/:id",
+        component: ParcelManagement,
+      },
     ],
   },
   {
     title: "User Management",
     items: [
       {
-        title: "User Management",
+        title: "All Users",
         url: "/admin/user/all-users",
+        component: ParcelManagement,
+      },
+      {
+        title: "Update User",
+        url: "/admin/user/:id",
         component: ParcelManagement,
       },
     ],

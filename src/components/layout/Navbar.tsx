@@ -12,9 +12,15 @@ import {
 } from "@/components/ui/popover";
 import Logo from "@/assets/icons/Logo.svg";
 import { ModeToggle } from "./ModeToggler";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import {
+  authApi,
+  useLogoutMutation,
+  useUserInfoQuery,
+} from "@/redux/features/auth/auth.api";
+import { useAppDispatch } from "@/redux/hook";
 
-// Navigation links array to be used in both desktop and mobile menus
+// Navigation links array
 const navigationLinks = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
@@ -23,6 +29,24 @@ const navigationLinks = [
 ];
 
 export default function Navbar() {
+  // Skip query if user just logged out
+  const { data } = useUserInfoQuery(undefined);
+  // console.log(data.data);
+
+  const [logout] = useLogoutMutation();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout(undefined).unwrap();
+      dispatch(authApi.util.resetApiState()); // Optional: reset cache
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
   return (
     <header className="border-b px-4 md:px-6">
       <div className="flex h-16 items-center justify-between gap-4 container mx-auto">
@@ -51,12 +75,12 @@ export default function Navbar() {
               </NavigationMenu>
             </PopoverContent>
           </Popover>
+
           {/* Main nav */}
           <div className="flex items-center gap-6">
             <a href="#" className="text-primary hover:text-primary/90">
               <img src={Logo} alt="Parcelo Logo" className="h-8 w-auto" />
             </a>
-            {/* Navigation menu */}
             <NavigationMenu className="max-md:hidden">
               <NavigationMenuList className="gap-2">
                 {navigationLinks.map((link, index) => (
@@ -73,6 +97,7 @@ export default function Navbar() {
             </NavigationMenu>
           </div>
         </div>
+
         {/* Right side */}
         <div className="flex items-center gap-4">
           <ModeToggle />

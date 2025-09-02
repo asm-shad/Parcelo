@@ -19,13 +19,18 @@ import {
   useUserInfoQuery,
 } from "@/redux/features/auth/auth.api";
 import { useAppDispatch } from "@/redux/hook";
+import { role } from "@/constants/role";
 
 // Navigation links array
 const navigationLinks = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/features", label: "Features" },
+  { href: "/", label: "Home", role: "PUBLIC" },
+  { href: "/about", label: "About", role: "PUBLIC" },
+  { href: "/pricing", label: "Pricing", role: "PUBLIC" },
+  { href: "/features", label: "Features", role: "PUBLIC" },
+  { href: "/admin", label: "Dashboard", role: role.admin },
+  { href: "/admin", label: "Dashboard", role: role.superAdmin },
+  { href: "/sender", label: "Dashboard", role: role.sender },
+  { href: "/receiver", label: "Dashboard", role: role.receiver },
 ];
 
 export default function Navbar() {
@@ -84,14 +89,28 @@ export default function Navbar() {
             <NavigationMenu className="max-md:hidden">
               <NavigationMenuList className="gap-2">
                 {navigationLinks.map((link, index) => (
-                  <NavigationMenuItem key={index}>
-                    <NavigationMenuLink
-                      asChild
-                      className="text-muted-foreground hover:text-primary py-1.5 font-medium"
-                    >
-                      <Link to={link.href}>{link.label}</Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
+                  <>
+                    {link.role === "PUBLIC" && (
+                      <NavigationMenuItem key={index}>
+                        <NavigationMenuLink
+                          asChild
+                          className="text-muted-foreground hover:text-primary py-1.5 font-medium"
+                        >
+                          <Link to={link.href}>{link.label}</Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
+                    {link.role === data?.data?.role && (
+                      <NavigationMenuItem key={index}>
+                        <NavigationMenuLink
+                          asChild
+                          className="text-muted-foreground hover:text-primary py-1.5 font-medium"
+                        >
+                          <Link to={link.href}>{link.label}</Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
+                  </>
                 ))}
               </NavigationMenuList>
             </NavigationMenu>

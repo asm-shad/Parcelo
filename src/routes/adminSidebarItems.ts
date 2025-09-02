@@ -1,6 +1,9 @@
-import Analytics from "@/pages/Admin/Analytics";
+// import Analytics from "@/pages/Admin/Analytics";
 import ParcelManagement from "@/pages/Admin/AllParcels";
 import type { ISidebarItem } from "@/types";
+import { lazy } from "react";
+
+const Analytics = lazy(() => import("@/pages/Admin/Analytics"));
 
 export const adminSidebarItems: ISidebarItem[] = [
   {

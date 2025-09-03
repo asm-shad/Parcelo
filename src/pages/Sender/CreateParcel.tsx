@@ -5,7 +5,7 @@ const CreateParcel = () => {
   console.log(data);
   return (
     <div>
-      <h1>CreateParcel</h1>
+      <h1 className="bg-red-100 w-full">CreateParcel</h1>
     </div>
   );
 };

@@ -31,7 +31,7 @@ export const authApi = baseApi.injectEndpoints({
       query: ({ userId, formData }) => ({
         url: `/user/${userId}`,
         method: "PATCH",
-        body: formData,
+        data: formData,
       }),
       invalidatesTags: ["USER"],
     }),

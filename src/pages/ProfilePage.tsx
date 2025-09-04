@@ -17,7 +17,6 @@ export default function ProfilePage() {
   const [quote, setQuote] = useState("");
 
   useEffect(() => {
-    // Pick random cover + quote on page load
     setCover(coverImages[Math.floor(Math.random() * coverImages.length)]);
     setQuote(
       motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]
@@ -35,9 +34,9 @@ export default function ProfilePage() {
   const user = data?.data;
 
   return (
-    <div className="relative min-h-screen w-full">
+    <div className="relative min-h-screen w-full overflow-x-hidden">
       {/* Hero Section with Dynamic Image */}
-      <div className="h-64 w-full overflow-hidden relative">
+      <div className="h-56 sm:h-64 w-full relative">
         <img
           src={cover}
           alt="profile cover"
@@ -45,11 +44,11 @@ export default function ProfilePage() {
         />
 
         {/* Action Buttons */}
-        <div className="absolute top-4 right-6 flex gap-3">
-          <UpdateProfileModal></UpdateProfileModal>
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-6 flex gap-2 sm:gap-3 flex-wrap justify-end">
+          <UpdateProfileModal />
           <Button
             onClick={() => navigate("/parcel/create")}
-            className="rounded-xl shadow-md transform transition-all duration-300 hover:scale-110 hover:shadow-lg text-foreground cursor-pointer"
+            className="rounded-xl shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg text-foreground text-sm sm:text-base"
           >
             Create Parcel
           </Button>
@@ -57,56 +56,64 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile Info */}
-      <div className="max-w-4xl mx-auto px-6 -mt-16 relative z-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-14 sm:-mt-16 relative z-10">
         <div className="flex flex-col items-center text-center">
-          <Avatar className="w-28 h-28 border-4 border-background shadow-lg">
+          <Avatar className="w-24 h-24 sm:w-28 sm:h-28 border-4 border-background shadow-lg">
             <AvatarImage src={user?.picture} alt={user?.name} />
-            <AvatarFallback className="bg-blue-100 text-blue-600 text-2xl">
+            <AvatarFallback className="bg-blue-100 text-blue-600 text-xl sm:text-2xl">
               {user?.name?.charAt(0).toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
 
-          <h1 className="mt-4 text-3xl font-semibold text-foreground">
+          <h1 className="mt-4 text-2xl sm:text-3xl font-semibold text-foreground break-words">
             {user?.name || "Unnamed User"}
           </h1>
-          <p className="text-muted-foreground">{user?.email || "No email"}</p>
+          <p className="text-sm sm:text-base text-muted-foreground break-all">
+            {user?.email || "No email"}
+          </p>
 
           {/* Badges */}
           <div className="mt-3 flex flex-wrap justify-center gap-2">
-            <Badge variant="outline" className="capitalize">
+            <Badge variant="outline" className="capitalize text-sm">
               {user?.role || "User"}
             </Badge>
             <Badge
-              className={
+              className={`text-sm ${
                 user?.isActive === "ACTIVE"
                   ? "bg-green-100 text-green-700"
                   : "bg-red-100 text-red-700"
-              }
+              }`}
             >
               {user?.isActive || "Inactive"}
             </Badge>
             {user?.isVerified ? (
-              <Badge className="bg-blue-100 text-blue-700 flex items-center gap-1">
+              <Badge className="bg-blue-100 text-blue-700 flex items-center gap-1 text-sm">
                 <ShieldCheck className="h-4 w-4" /> Verified
               </Badge>
             ) : (
-              <Badge className="bg-gray-100 text-gray-500">Unverified</Badge>
+              <Badge className="bg-gray-100 text-gray-500 text-sm">
+                Unverified
+              </Badge>
             )}
           </div>
         </div>
 
         {/* User Details */}
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-6 text-center sm:text-left">
-          <div className="flex items-center gap-3">
-            <Phone className="h-5 w-5 text-blue-500" />
-            <span>{user?.phone || "No phone provided"}</span>
+        <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-center sm:text-left">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Phone className="h-5 w-5 text-blue-500 shrink-0" />
+            <span className="truncate">
+              {user?.phone || "No phone provided"}
+            </span>
           </div>
-          <div className="flex items-center gap-3">
-            <MapPin className="h-5 w-5 text-blue-500" />
-            <span>{user?.address || "No address provided"}</span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <MapPin className="h-5 w-5 text-blue-500 shrink-0" />
+            <span className="truncate">
+              {user?.address || "No address provided"}
+            </span>
           </div>
-          <div className="flex items-center gap-3">
-            <Calendar className="h-5 w-5 text-blue-500" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Calendar className="h-5 w-5 text-blue-500 shrink-0" />
             <span>
               Member since{" "}
               {user?.createdAt
@@ -117,8 +124,8 @@ export default function ProfilePage() {
         </div>
 
         {/* Motivational Quote */}
-        <div className="mt-14 text-center">
-          <blockquote className="text-xl italic font-medium text-muted-foreground">
+        <div className="mt-10 sm:mt-14 text-center px-2">
+          <blockquote className="text-lg sm:text-xl italic font-medium text-muted-foreground">
             “{quote}”
           </blockquote>
         </div>

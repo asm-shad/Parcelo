@@ -14,7 +14,7 @@ export const parcelApi = baseApi.injectEndpoints({
         url: "/parcel/my-parcels",
         method: "GET",
       }),
-      //   providesTags: ["USER"],
+      providesTags: ["PARCEL"],
       transformResponse: (res) => res.data,
     }),
   }),

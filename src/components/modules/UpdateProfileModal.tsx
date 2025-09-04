@@ -83,11 +83,16 @@ export function UpdateProfileModal() {
 
     // Debug: Log FormData contents
     for (const [key, value] of formData.entries()) {
-      console.log(key, value);
+      if (value instanceof File) {
+        console.log(key, value.name, value.type, value.size);
+      } else {
+        console.log(key, value);
+      }
     }
 
     try {
-      await updateProfile({ userId: user._id, formData }).unwrap();
+      const res = await updateProfile({ userId: user._id, formData }).unwrap();
+      console.log("UpdateProfile response:", res);
       toast.success("Profile updated successfully!");
       setOpen(false);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -156,8 +161,8 @@ export function UpdateProfileModal() {
             />
 
             {/* Image Upload */}
-            <div className="mb-2">
-              <FormLabel>Profile Picture</FormLabel>
+            <div>
+              <FormLabel className="mb-2">Profile Picture</FormLabel>
               <SingleImageUploader onChange={setImage} />
             </div>
           </form>
@@ -167,7 +172,12 @@ export function UpdateProfileModal() {
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button type="submit" form="update-profile-form" disabled={isLoading}>
+          <Button
+            className="text-foreground"
+            type="submit"
+            form="update-profile-form"
+            disabled={isLoading}
+          >
             {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>

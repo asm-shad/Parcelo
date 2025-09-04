@@ -41,7 +41,7 @@ export const router = createBrowserRouter([
     Component: withAuth(DashboardLayout, role.sender as TRole),
     path: "/sender",
     children: [
-      { index: true, element: <Navigate to="/sender/parcel/my-parcels" /> },
+      { index: true, element: <Navigate to="/sender/user/me" /> },
       ...generateRoutes(senderSidebarItems),
     ],
   },
@@ -49,7 +49,7 @@ export const router = createBrowserRouter([
     Component: withAuth(DashboardLayout, role.receiver as TRole),
     path: "/receiver",
     children: [
-      { index: true, element: <Navigate to="/receiver/parcel/my-parcels" /> },
+      { index: true, element: <Navigate to="/receiver/user/me" /> },
       ...generateRoutes(receiverSidebarItems),
     ],
   },

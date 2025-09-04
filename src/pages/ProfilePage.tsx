@@ -7,6 +7,7 @@ import { Loader2, Phone, MapPin, Calendar, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router";
 import { motivationalQuotes } from "@/constants/motivationalQuotes";
 import { coverImages } from "@/constants/coverImages";
+import { UpdateProfileModal } from "@/components/modules/UpdateProfileModal";
 
 export default function ProfilePage() {
   const { data, isLoading } = useUserInfoQuery(undefined);
@@ -45,16 +46,10 @@ export default function ProfilePage() {
 
         {/* Action Buttons */}
         <div className="absolute top-4 right-6 flex gap-3">
-          <Button
-            variant="outline"
-            onClick={() => navigate("/profile/edit")}
-            className="rounded-xl shadow-md transform transition-all duration-300 hover:scale-110 hover:shadow-lg"
-          >
-            Update Profile
-          </Button>
+          <UpdateProfileModal></UpdateProfileModal>
           <Button
             onClick={() => navigate("/parcel/create")}
-            className="rounded-xl shadow-md transform transition-all duration-300 hover:scale-110 hover:shadow-lg"
+            className="rounded-xl shadow-md transform transition-all duration-300 hover:scale-110 hover:shadow-lg text-foreground cursor-pointer"
           >
             Create Parcel
           </Button>

@@ -26,16 +26,20 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateParcelMutation } from "@/redux/features/parcel/parcel.api";
-import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
+import {
+  useUserInfoQuery,
+  useGetAllUsersQuery,
+} from "@/redux/features/auth/auth.api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 import type { IErrorResponse } from "@/types";
 import type { FileMetadata } from "@/hooks/use-file-upload";
+import { useNavigate } from "react-router";
 
-// Form validation schema - using strings for numeric fields like the tour example
+// Form validation schema
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
@@ -48,13 +52,26 @@ const formSchema = z.object({
   receiverAddress: z.string().min(1, "Receiver address is required"),
 });
 
+interface User {
+  _id: string;
+  email: string;
+  name: string;
+  role: string;
+  address?: string;
+}
+
 export default function CreateParcel() {
   const [images, setImages] = useState<(File | FileMetadata)[] | []>([]);
   const [createParcel] = useCreateParcelMutation();
+  const [receiverUsers, setReceiverUsers] = useState<User[]>([]);
+  const navigate = useNavigate();
 
   // Fetch current user info
-  const { data: userInfo, isLoading: userLoading } =
-    useUserInfoQuery(undefined);
+  const { data: userInfo } = useUserInfoQuery(undefined);
+
+  // Fetch all users (you might need to adjust this based on your API)
+  const { data: allUsersData, isLoading: usersLoading } =
+    useGetAllUsersQuery(undefined);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -71,10 +88,24 @@ export default function CreateParcel() {
     },
   });
 
-  // Update sender address when sender is selected
-  const handleSenderChange = (userId: string) => {
-    if (userId === userInfo?.data?._id) {
+  useEffect(() => {
+    if (allUsersData?.data) {
+      const receivers = allUsersData.data.filter(
+        (user: User) => user.role === "RECEIVER"
+      );
+      setReceiverUsers(receivers);
+    }
+
+    if (userInfo?.data) {
+      form.setValue("sender", userInfo.data._id);
       form.setValue("senderAddress", userInfo.data.address || "");
+    }
+  }, [allUsersData, userInfo, form]);
+
+  const handleReceiverChange = (userId: string) => {
+    const selectedReceiver = receiverUsers.find((user) => user._id === userId);
+    if (selectedReceiver && selectedReceiver.address) {
+      form.setValue("receiverAddress", selectedReceiver.address);
     }
   };
 
@@ -82,7 +113,6 @@ export default function CreateParcel() {
     const toastId = toast.loading("Creating parcel...");
 
     try {
-      // Convert string fields to numbers like in the tour example
       const parcelData = {
         ...data,
         weightKg: Number(data.weightKg),
@@ -92,7 +122,6 @@ export default function CreateParcel() {
       const formData = new FormData();
       formData.append("data", JSON.stringify(parcelData));
 
-      // Add images to formData
       images.forEach((image) => {
         if (image instanceof File) {
           formData.append("files", image);
@@ -105,6 +134,7 @@ export default function CreateParcel() {
         toast.success("Parcel created successfully", { id: toastId });
         form.reset();
         setImages([]);
+        navigate("/my-parcels");
       } else {
         toast.error("Failed to create parcel", { id: toastId });
       }
@@ -221,37 +251,14 @@ export default function CreateParcel() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <FormField
-                  control={form.control}
-                  name="sender"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sender</FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleSenderChange(value);
-                        }}
-                        value={field.value}
-                        disabled={userLoading}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select sender" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {userInfo?.data && (
-                            <SelectItem value={userInfo.data._id}>
-                              {userInfo.data.name} (You)
-                            </SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <FormLabel>Sender Name</FormLabel>
+                  <Input
+                    value={userInfo?.data?.name || ""}
+                    disabled
+                    placeholder="Your name"
+                  />
+                </div>
 
                 <FormField
                   control={form.control}
@@ -259,9 +266,27 @@ export default function CreateParcel() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Receiver</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Receiver ID" {...field} />
-                      </FormControl>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          handleReceiverChange(value);
+                        }}
+                        value={field.value}
+                        disabled={usersLoading}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select receiver" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {receiverUsers.map((user) => (
+                            <SelectItem key={user._id} value={user._id}>
+                              {user.email} {user.name && `- ${user.name}`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -314,7 +339,11 @@ export default function CreateParcel() {
           </Form>
         </CardContent>
         <CardFooter className="flex justify-end">
-          <Button type="submit" form="create-parcel-form">
+          <Button
+            type="submit"
+            form="create-parcel-form"
+            className="text-foreground"
+          >
             Create Parcel
           </Button>
         </CardFooter>

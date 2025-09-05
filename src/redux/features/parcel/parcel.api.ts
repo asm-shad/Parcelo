@@ -25,6 +25,14 @@ export const parcelApi = baseApi.injectEndpoints({
       providesTags: ["PARCEL"],
       transformResponse: (res) => res.data,
     }),
+    getParcelDetails: builder.query({
+      query: (parcelId) => ({
+        url: `/parcel/${parcelId}`,
+        method: "GET",
+      }),
+      providesTags: (parcelId) => [{ type: "PARCEL", id: parcelId }],
+      transformResponse: (res) => res.data,
+    }),
     UpdateParcel: builder.mutation({
       query: ({ parcelId, parcelInfo }) => ({
         url: `/parcel/update/${parcelId}`,
@@ -41,6 +49,13 @@ export const parcelApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["PARCEL"],
     }),
+    trackParcel: builder.query({
+      query: (trackingId) => ({
+        url: `/parcel/track/${trackingId}`,
+        method: "GET",
+      }),
+      providesTags: (trackingId) => [{ type: "PARCEL", id: trackingId }],
+    }),
   }),
 });
 
@@ -50,4 +65,6 @@ export const {
   useUpdateParcelMutation,
   useUpdateParcelStatusMutation,
   useGetAllParcelsQuery,
+  useGetParcelDetailsQuery,
+  useTrackParcelQuery,
 } = parcelApi;

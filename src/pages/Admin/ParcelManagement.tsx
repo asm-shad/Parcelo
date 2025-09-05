@@ -136,7 +136,7 @@ export default function ParcelManagement() {
             <Button
               variant="outline"
               onClick={() => refetch()}
-              className="border-blue-300 text-blue-700 hover:bg-blue-50"
+              className="border-blue-30 hover:bg-blue-50 cursor-pointer"
             >
               Refresh
             </Button>
@@ -261,10 +261,11 @@ export default function ParcelManagement() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(parcel._id)}
-                          disabled={
+                          className={
                             parcel.currentStatus === ParcelStatus.Delivered
+                              ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800"
+                              : "bg-blue-50 text-foreground border-blue-200"
                           }
-                          className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 hover:text-blue-800"
                         >
                           {parcel.currentStatus === ParcelStatus.Delivered
                             ? "View"

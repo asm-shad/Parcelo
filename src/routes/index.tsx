@@ -13,6 +13,7 @@ import UnAuthorized from "@/pages/UnAuthorized";
 import { withAuth } from "@/utils/withAuth";
 import { role } from "@/constants/role";
 import type { TRole } from "@/types";
+import TrackParcel from "@/pages/TrackParcel";
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,14 @@ export const router = createBrowserRouter([
       {
         Component: withAuth(About),
         path: "about",
+      },
+      {
+        Component: TrackParcel,
+        path: "track",
+      },
+      {
+        Component: TrackParcel,
+        path: "track/:trackingId",
       },
     ],
   },

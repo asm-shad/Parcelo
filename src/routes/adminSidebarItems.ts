@@ -1,5 +1,6 @@
 // import Analytics from "@/pages/Admin/Analytics";
-import ParcelManagement from "@/pages/Admin/AllParcels";
+import ParcelManagement from "@/pages/Admin/ParcelManagement";
+import UserManagement from "@/pages/Admin/UserManagement";
 import type { ISidebarItem } from "@/types";
 import { lazy } from "react";
 
@@ -14,35 +15,15 @@ export const adminSidebarItems: ISidebarItem[] = [
         url: "/admin/analytics",
         component: Analytics,
       },
-    ],
-  },
-  {
-    title: "Parcel Management",
-    items: [
       {
         title: "Parcel Management",
         url: "/admin/parcel",
         component: ParcelManagement,
       },
       {
-        title: "Update Parcel",
-        url: "/admin/parcel/:id",
-        component: ParcelManagement,
-      },
-    ],
-  },
-  {
-    title: "User Management",
-    items: [
-      {
-        title: "All Users",
+        title: "User Management",
         url: "/admin/user/all-users",
-        component: ParcelManagement,
-      },
-      {
-        title: "Update User",
-        url: "/admin/user/:id",
-        component: ParcelManagement,
+        component: UserManagement,
       },
     ],
   },

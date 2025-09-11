@@ -9,6 +9,11 @@ import { createBrowserRouter, Navigate } from "react-router";
 import { adminSidebarItems } from "./adminSidebarItems";
 import { senderSidebarItems } from "./senderSidebarItems";
 import { receiverSidebarItems } from "./receiverSidebarItems";
+import UnAuthorized from "@/pages/UnAuthorized";
+import { withAuth } from "@/utils/withAuth";
+import { role } from "@/constants/role";
+import type { TRole } from "@/types";
+import TrackParcel from "@/pages/TrackParcel";
 
 export const router = createBrowserRouter([
   {
@@ -16,32 +21,44 @@ export const router = createBrowserRouter([
     path: "/",
     children: [
       {
-        Component: About,
+        Component: withAuth(About),
         path: "about",
+      },
+      {
+        Component: TrackParcel,
+        path: "track",
+      },
+      {
+        Component: TrackParcel,
+        path: "track/:trackingId",
       },
     ],
   },
   {
-    Component: DashboardLayout,
+    Component: withAuth(DashboardLayout, [
+      role.superAdmin,
+      role.admin,
+    ] as TRole[]),
     path: "/admin",
     children: [
       { index: true, element: <Navigate to="/admin/analytics" /> },
       ...generateRoutes(adminSidebarItems),
     ],
   },
+
   {
-    Component: DashboardLayout,
+    Component: withAuth(DashboardLayout, role.sender as TRole),
     path: "/sender",
     children: [
-      { index: true, element: <Navigate to="/sender/parcel/my-parcels" /> },
+      { index: true, element: <Navigate to="/sender/user/me" /> },
       ...generateRoutes(senderSidebarItems),
     ],
   },
   {
-    Component: DashboardLayout,
+    Component: withAuth(DashboardLayout, role.receiver as TRole),
     path: "/receiver",
     children: [
-      { index: true, element: <Navigate to="/receiver/parcel/my-parcels" /> },
+      { index: true, element: <Navigate to="/receiver/user/me" /> },
       ...generateRoutes(receiverSidebarItems),
     ],
   },
@@ -56,5 +73,9 @@ export const router = createBrowserRouter([
   {
     Component: Verify,
     path: "/verify",
+  },
+  {
+    Component: UnAuthorized,
+    path: "/unauthorized",
   },
 ]);

@@ -4,3 +4,9 @@ export const role = {
   receiver: "RECEIVER",
   sender: "SENDER",
 };
+
+export const IsActive = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+  BLOCKED: "BLOCKED",
+};

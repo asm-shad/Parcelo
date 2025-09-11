@@ -10,6 +10,7 @@ export const authApi = baseApi.injectEndpoints({
         data: userInfo,
       }),
     }),
+
     logout: builder.mutation({
       query: () => ({
         url: "/auth/logout",
@@ -17,6 +18,7 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["USER"],
     }),
+
     register: builder.mutation({
       query: (userInfo) => ({
         url: "/user/register",
@@ -24,6 +26,25 @@ export const authApi = baseApi.injectEndpoints({
         data: userInfo,
       }),
     }),
+
+    updateProfile: builder.mutation({
+      query: ({ userId, formData }) => ({
+        url: `/user/${userId}`,
+        method: "PATCH",
+        data: formData,
+      }),
+      invalidatesTags: ["USER"],
+    }),
+
+    updateUserStatus: builder.mutation({
+      query: ({ userId, statusData }) => ({
+        url: `/user/status/${userId}`,
+        method: "PATCH",
+        data: statusData,
+      }),
+      invalidatesTags: ["USER"],
+    }),
+
     sendOtp: builder.mutation<IResponse<null>, ISendOtp>({
       query: (userInfo) => ({
         url: "/otp/send",
@@ -31,6 +52,14 @@ export const authApi = baseApi.injectEndpoints({
         data: userInfo,
       }),
     }),
+
+    getAllUsers: builder.query({
+      query: () => ({
+        url: "/user/all-users",
+        method: "GET",
+      }),
+    }),
+
     verifyOtp: builder.mutation<IResponse<null>, IVerifyOtp>({
       query: (userInfo) => ({
         url: "/otp/verify",
@@ -51,8 +80,11 @@ export const authApi = baseApi.injectEndpoints({
 export const {
   useRegisterMutation,
   useLoginMutation,
+  useUpdateProfileMutation,
   useSendOtpMutation,
   useVerifyOtpMutation,
   useUserInfoQuery,
   useLogoutMutation,
+  useGetAllUsersQuery,
+  useUpdateUserStatusMutation
 } = authApi;

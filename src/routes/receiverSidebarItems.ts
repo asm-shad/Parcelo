@@ -1,5 +1,5 @@
 import ProfilePage from "@/pages/ProfilePage";
-import IncomingParcels from "@/pages/Receiver/IncomingParcels";
+import ParcelsToReceive from "@/pages/Receiver/ParcelsToReceive";
 import ReceivedParcels from "@/pages/Receiver/ReceivedParcels";
 import type { ISidebarItem } from "@/types";
 
@@ -12,16 +12,16 @@ export const receiverSidebarItems: ISidebarItem[] = [
               url: "/receiver/user/me",
               component: ProfilePage,
             },
-      {
-        title: "Parcels to Receive",
-        url: "/receiver/parcel/incoming-parcels",
-        component: IncomingParcels,
-      },
-      {
-        title: "All Received Parcels",
-        url: "/receiver/parcel/my-parcels",
-        component: ReceivedParcels,
-      },
+{
+  title: "Parcels to Receive",
+  url: "/receiver/parcels-to-receive",
+  component: ParcelsToReceive,
+},
+{
+  title: "Received Parcels", 
+  url: "/receiver/received-parcels",
+  component: ReceivedParcels,
+}
     ],
   },
 ];

@@ -13,9 +13,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { toast } from "react-hot-toast";
 import {
   Package,
+  Truck,
   CheckCircle,
+  Clock,
   MapPin,
   Search,
   RefreshCw,
@@ -23,10 +26,10 @@ import {
   Phone,
   Box,
   FileText,
-  AlertCircle,
-  Calendar
+  DollarSign,
+  AlertCircle
 } from "lucide-react";
-import { useGetIncomingParcelsQuery } from "@/redux/features/parcel/parcel.api";
+import { useConfirmDeliveryMutation, useGetIncomingParcelsQuery } from "@/redux/features/parcel/parcel.api";
 
 interface IParcel {
   _id: string;
@@ -59,19 +62,40 @@ interface IParcel {
   deliveredAt?: string;
 }
 
-export default function ReceivedParcels() {
+const statusColors: Record<string, string> = {
+  Requested: "bg-yellow-100 text-yellow-800",
+  Approved: "bg-blue-100 text-blue-800",
+  Dispatched: "bg-purple-100 text-purple-800",
+  "In Transit": "bg-orange-100 text-orange-800",
+  Delivered: "bg-green-100 text-green-800",
+  Cancelled: "bg-red-100 text-red-800",
+  Blocked: "bg-gray-100 text-gray-800",
+};
+
+const statusIcons: Record<string, React.ComponentType<any>> = {
+  Requested: Clock,
+  Approved: CheckCircle,
+  Dispatched: Truck,
+  "In Transit": Truck,
+  Delivered: CheckCircle,
+  Cancelled: Clock,
+  Blocked: Clock,
+};
+
+export default function ParcelsToReceive() {
   const [searchTerm, setSearchTerm] = useState("");
   const [parcels, setParcels] = useState<IParcel[]>([]);
 
   const { data: parcelsResponse, isLoading, error, refetch } = useGetIncomingParcelsQuery(undefined);
+  const [confirmDelivery] = useConfirmDeliveryMutation();
 
   useEffect(() => {
     if (parcelsResponse) {
-      // Filter only delivered parcels
-      const deliveredParcels = parcelsResponse.filter((parcel: IParcel) => 
-        parcel.isDelivered || parcel.currentStatus === "Delivered"
+      // Filter out delivered parcels and only show parcels that are not delivered
+      const incomingParcels = parcelsResponse.filter((parcel: IParcel) => 
+        !parcel.isDelivered && parcel.currentStatus !== "Delivered"
       );
-      setParcels(deliveredParcels);
+      setParcels(incomingParcels);
     }
   }, [parcelsResponse]);
 
@@ -83,13 +107,27 @@ export default function ReceivedParcels() {
     );
   });
 
+  const handleConfirmDelivery = async (parcelId: string) => {
+    try {
+      await confirmDelivery(parcelId).unwrap();
+      toast.success("Delivery confirmed successfully");
+      refetch();
+    } catch (error) {
+      toast.error("Failed to confirm delivery");
+      console.error("Error confirming delivery:", error);
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    const IconComponent = statusIcons[status] || Package;
+    return <IconComponent className="h-4 w-4" />;
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: 'numeric'
     });
   };
 
@@ -119,11 +157,11 @@ export default function ReceivedParcels() {
       <div className="space-y-4 pb-6 border-b">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-              Received Parcels
+            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
+              Parcels to Receive
             </h1>
             <p className="text-muted-foreground mt-2">
-              {parcels.length} delivered parcel(s) found
+              {parcels.length} incoming parcel(s) found
             </p>
           </div>
           <div className="flex items-center space-x-4">
@@ -164,8 +202,8 @@ export default function ReceivedParcels() {
               <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground text-lg">
                 {parcels.length === 0
-                  ? "No parcels have been delivered yet."
-                  : "No delivered parcels match your search criteria."}
+                  ? "No incoming parcels to receive."
+                  : "No parcels match your search criteria."}
               </p>
               <Button
                 variant="outline"
@@ -184,8 +222,9 @@ export default function ReceivedParcels() {
                     <TableHead>Parcel Details</TableHead>
                     <TableHead>Sender Info</TableHead>
                     <TableHead>Delivery Address</TableHead>
-                    <TableHead>Delivery Date</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Expected Delivery</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -206,6 +245,10 @@ export default function ReceivedParcels() {
                           </div>
                           <div className="text-sm">
                             Type: {parcel.type} • {parcel.weightKg} kg
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <DollarSign className="h-3 w-3" />
+                            <span>Fee: ${parcel.fee}</span>
                           </div>
                         </div>
                       </TableCell>
@@ -231,16 +274,34 @@ export default function ReceivedParcels() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-3 w-3" />
-                          {parcel.deliveredAt ? formatDate(parcel.deliveredAt) : 'N/A'}
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(parcel.currentStatus)}
+                          <Badge className={statusColors[parcel.currentStatus]}>
+                            {parcel.currentStatus}
+                          </Badge>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className="bg-green-100 text-green-800">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Delivered
-                        </Badge>
+                        <div className="text-sm text-muted-foreground">
+                          {formatDate(parcel.createdAt)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {parcel.currentStatus === "In Transit" && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleConfirmDelivery(parcel._id)}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Confirm Delivery
+                          </Button>
+                        )}
+                        {parcel.currentStatus !== "In Transit" && (
+                          <span className="text-xs text-muted-foreground">
+                            Wait for delivery
+                          </span>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

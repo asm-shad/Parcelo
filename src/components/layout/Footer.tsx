@@ -3,8 +3,8 @@ import Logo from "@/assets/icons/Logo.svg";
 
 const Footer = () => {
   return (
-    <footer className=" ">
-      <div className=" container mx-auto lg:grid lg:grid-cols-5">
+    <footer className="">
+      <div className="container mx-auto lg:grid lg:grid-cols-5">
         <div className="relative block h-32 lg:col-span-2 lg:h-full">
           <img
             src={Delivery}

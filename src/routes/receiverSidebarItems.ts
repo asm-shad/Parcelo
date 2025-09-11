@@ -7,21 +7,21 @@ export const receiverSidebarItems: ISidebarItem[] = [
   {
     title: "Dashboard",
     items: [
-            {
-              title: "Profile",
-              url: "/receiver/user/me",
-              component: ProfilePage,
-            },
-{
-  title: "Parcels to Receive",
-  url: "/receiver/parcels-to-receive",
-  component: ParcelsToReceive,
-},
-{
-  title: "Received Parcels", 
-  url: "/receiver/received-parcels",
-  component: ReceivedParcels,
-}
+      {
+        title: "Profile",
+        url: "/receiver/user/me",
+        component: ProfilePage,
+      },
+      {
+        title: "Parcels to Receive",
+        url: "/receiver/parcels-to-receive",
+        component: ParcelsToReceive,
+      },
+      {
+        title: "Received Parcels",
+        url: "/receiver/received-parcels",
+        component: ReceivedParcels,
+      },
     ],
   },
 ];

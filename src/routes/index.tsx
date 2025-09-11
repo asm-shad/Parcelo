@@ -1,6 +1,5 @@
 import App from "@/App";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import About from "@/pages/About";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Verify from "@/pages/Verify";
@@ -14,6 +13,8 @@ import { withAuth } from "@/utils/withAuth";
 import { role } from "@/constants/role";
 import type { TRole } from "@/types";
 import TrackParcel from "@/pages/TrackParcel";
+import Homepage from "@/pages/Homepage";
+import { ContactUs } from "@/pages/ContactUs";
 
 export const router = createBrowserRouter([
   {
@@ -21,9 +22,17 @@ export const router = createBrowserRouter([
     path: "/",
     children: [
       {
-        Component: withAuth(About),
-        path: "about",
+        Component: Homepage,
+        index: true,
       },
+      {
+        Component: ContactUs,
+        path: "contact-us",
+      },
+      // {
+      //   Component: withAuth(About),
+      //   path: "about",
+      // },
       {
         Component: TrackParcel,
         path: "track",

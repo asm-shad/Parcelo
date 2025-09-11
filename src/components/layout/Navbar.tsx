@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/popover";
 import Logo from "@/assets/icons/Logo.svg";
 import { ModeToggle } from "./ModeToggler";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
 import {
   authApi,
   useLogoutMutation,
@@ -24,9 +24,9 @@ import { role } from "@/constants/role";
 // Navigation links array
 const navigationLinks = [
   { href: "/", label: "Home", role: "PUBLIC" },
-  { href: "/about", label: "About", role: "PUBLIC" },
-  { href: "/pricing", label: "Pricing", role: "PUBLIC" },
-  { href: "/features", label: "Features", role: "PUBLIC" },
+  { href: "#about", label: "About", role: "PUBLIC", isAnchor: true },
+  { href: "#features", label: "Features", role: "PUBLIC", isAnchor: true },
+  { href: "/contact-us", label: "Contact Us", role: "PUBLIC" },
   { href: "/admin", label: "Dashboard", role: role.admin },
   { href: "/admin", label: "Dashboard", role: role.superAdmin },
   { href: "/sender", label: "Dashboard", role: role.sender },
@@ -36,11 +36,10 @@ const navigationLinks = [
 export default function Navbar() {
   // Skip query if user just logged out
   const { data } = useUserInfoQuery(undefined);
-  // console.log(data.data);
-
   const [logout] = useLogoutMutation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -49,6 +48,32 @@ export default function Navbar() {
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
+    }
+  };
+
+  // Function to handle anchor link clicks
+  const handleAnchorClick = (e: React.MouseEvent, href: string) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      const sectionId = href.substring(1); // Remove the # to get the ID
+
+      if (location.pathname === "/") {
+        // We're on the homepage, scroll to the section
+        const section = document.getElementById(sectionId);
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        // We're on another page, navigate to homepage first then scroll
+        navigate("/");
+        // Use a small timeout to ensure the page has loaded
+        setTimeout(() => {
+          const section = document.getElementById(sectionId);
+          if (section) {
+            section.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 100);
+      }
     }
   };
 
@@ -72,7 +97,14 @@ export default function Navbar() {
                   {navigationLinks.map((link, index) => (
                     <NavigationMenuItem key={index} className="w-full">
                       <NavigationMenuLink asChild className="py-1.5">
-                        <Link to={link.href}>{link.label}</Link>
+                        <Link
+                          to={link.href}
+                          onClick={(e) =>
+                            link.isAnchor && handleAnchorClick(e, link.href)
+                          }
+                        >
+                          {link.label}
+                        </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                   ))}
@@ -84,7 +116,10 @@ export default function Navbar() {
           {/* Main nav */}
           <div className="flex items-center gap-6">
             <Link to="/" className="text-primary hover:text-primary/90">
-              <img src={Logo} alt="Parcelo Logo" className="h-8 w-auto" />
+              <div className="flex items-center justify-baseline space-x-3 font-story">
+                <img src={Logo} alt="Parcelo Logo" className="h-8 w-auto" />
+                <p className="text-5xl font-bold">Parcelo</p>
+              </div>
             </Link>
             <NavigationMenu className="max-md:hidden">
               <NavigationMenuList className="gap-2">
@@ -96,7 +131,14 @@ export default function Navbar() {
                           asChild
                           className="text-muted-foreground hover:text-primary py-1.5 font-medium"
                         >
-                          <Link to={link.href}>{link.label}</Link>
+                          <Link
+                            to={link.href}
+                            onClick={(e) =>
+                              link.isAnchor && handleAnchorClick(e, link.href)
+                            }
+                          >
+                            {link.label}
+                          </Link>
                         </NavigationMenuLink>
                       </NavigationMenuItem>
                     )}
@@ -124,13 +166,13 @@ export default function Navbar() {
             <Button
               onClick={handleLogout}
               variant="outline"
-              className="text-sm"
+              className="text-sm cursor-pointer"
             >
               Logout
             </Button>
           )}
           {!data?.data?.email && (
-            <Button asChild className="text-sm">
+            <Button asChild className="text-sm cursor-pointer">
               <Link to="/login">Login</Link>
             </Button>
           )}

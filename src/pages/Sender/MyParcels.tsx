@@ -38,6 +38,7 @@ import {
   Box,
   FileText,
   AlertCircle,
+  Shield,
 } from "lucide-react";
 import {
   useCancelParcelMutation,
@@ -72,38 +73,29 @@ interface IParcel {
   deliveredAt?: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface IParcelResponse {
-  success: boolean;
-  message: string;
-  data: IParcel[];
-}
-
+// Update status colors and icons based on the new enum
 const statusColors: Record<string, string> = {
-  PENDING:
+  Requested:
     "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-  CONFIRMED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  PICKED_UP:
+  Approved: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+  Dispatched:
     "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  IN_TRANSIT:
+  "In Transit":
     "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
-  OUT_FOR_DELIVERY:
-    "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",
-  DELIVERED:
+  Delivered:
     "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  CANCELLED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-  RETURNED: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
+  Cancelled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  Blocked: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
 };
 
 const statusIcons: Record<string, React.ComponentType<any>> = {
-  PENDING: Clock,
-  CONFIRMED: CheckCircle,
-  PICKED_UP: Truck,
-  IN_TRANSIT: Truck,
-  OUT_FOR_DELIVERY: Truck,
-  DELIVERED: CheckCircle,
-  CANCELLED: XCircle,
-  RETURNED: Ban,
+  Requested: Clock,
+  Approved: CheckCircle,
+  Dispatched: Truck,
+  "In Transit": Truck,
+  Delivered: CheckCircle,
+  Cancelled: XCircle,
+  Blocked: Shield,
 };
 
 export default function MyParcels() {
@@ -227,6 +219,24 @@ export default function MyParcels() {
     });
   };
 
+  // Check if parcel can be edited (only in Requested status)
+  const canEditParcel = (parcel: IParcel) => {
+    return (
+      parcel.currentStatus === "Requested" &&
+      !parcel.isCancelled &&
+      !parcel.isBlocked
+    );
+  };
+
+  // Check if parcel can be cancelled (only in Requested status)
+  const canCancelParcel = (parcel: IParcel) => {
+    return (
+      parcel.currentStatus === "Requested" &&
+      !parcel.isCancelled &&
+      !parcel.isBlocked
+    );
+  };
+
   if (error) {
     console.error("Error loading parcels:", error);
     return (
@@ -251,8 +261,8 @@ export default function MyParcels() {
 
   // Debug information in development
   if (process.env.NODE_ENV === "development" && !isLoading) {
-    // console.log('Processed parcels:', parcels);
-    // console.log('Filtered parcels:', filteredParcels);
+    console.log("Processed parcels:", parcels);
+    console.log("Filtered parcels:", filteredParcels);
   }
 
   return (
@@ -303,15 +313,13 @@ export default function MyParcels() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="PENDING">Pending</SelectItem>
-                <SelectItem value="CONFIRMED">Confirmed</SelectItem>
-                <SelectItem value="PICKED_UP">Picked Up</SelectItem>
-                <SelectItem value="IN_TRANSIT">In Transit</SelectItem>
-                <SelectItem value="OUT_FOR_DELIVERY">
-                  Out for Delivery
-                </SelectItem>
-                <SelectItem value="DELIVERED">Delivered</SelectItem>
-                <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                <SelectItem value="Requested">Requested</SelectItem>
+                <SelectItem value="Approved">Approved</SelectItem>
+                <SelectItem value="Dispatched">Dispatched</SelectItem>
+                <SelectItem value="In Transit">In Transit</SelectItem>
+                <SelectItem value="Delivered">Delivered</SelectItem>
+                <SelectItem value="Cancelled">Cancelled</SelectItem>
+                <SelectItem value="Blocked">Blocked</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -465,12 +473,17 @@ export default function MyParcels() {
                         <div className="flex items-center gap-2">
                           {getStatusIcon(parcel.currentStatus)}
                           <Badge className={statusColors[parcel.currentStatus]}>
-                            {parcel.currentStatus.replace("_", " ")}
+                            {parcel.currentStatus}
                           </Badge>
                         </div>
                         {parcel.isCancelled && (
                           <Badge variant="destructive" className="mt-1">
                             Cancelled
+                          </Badge>
+                        )}
+                        {parcel.isBlocked && (
+                          <Badge variant="secondary" className="mt-1">
+                            Blocked
                           </Badge>
                         )}
                         {parcel.isDelivered && (
@@ -509,26 +522,31 @@ export default function MyParcels() {
                           </div>
                         ) : (
                           <div className="flex items-center justify-end gap-2">
-                            {parcel.currentStatus === "PENDING" &&
-                              !parcel.isCancelled && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleEditParcel(parcel)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() =>
-                                      handleCancelParcel(parcel._id)
-                                    }
-                                  >
-                                    <Ban className="h-4 w-4" />
-                                  </Button>
-                                </>
+                            {canEditParcel(parcel) && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEditParcel(parcel)}
+                                title="Edit parcel details"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {canCancelParcel(parcel) && (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleCancelParcel(parcel._id)}
+                                title="Cancel parcel"
+                              >
+                                <Ban className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {!canEditParcel(parcel) &&
+                              !canCancelParcel(parcel) && (
+                                <span className="text-xs text-muted-foreground">
+                                  No actions available
+                                </span>
                               )}
                           </div>
                         )}

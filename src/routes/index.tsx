@@ -29,10 +29,6 @@ export const router = createBrowserRouter([
         Component: ContactUs,
         path: "contact-us",
       },
-      // {
-      //   Component: withAuth(About),
-      //   path: "about",
-      // },
       {
         Component: TrackParcel,
         path: "track",

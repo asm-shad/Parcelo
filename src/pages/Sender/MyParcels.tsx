@@ -37,9 +37,13 @@ import {
   DollarSign,
   Box,
   FileText,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
-import { useCancelParcelMutation, useGetParcelQuery, useUpdateParcelMutation } from "@/redux/features/parcel/parcel.api";
+import {
+  useCancelParcelMutation,
+  useGetParcelQuery,
+  useUpdateParcelMutation,
+} from "@/redux/features/parcel/parcel.api";
 
 interface IParcel {
   _id: string;
@@ -76,12 +80,17 @@ interface IParcelResponse {
 }
 
 const statusColors: Record<string, string> = {
-  PENDING: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+  PENDING:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
   CONFIRMED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  PICKED_UP: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  IN_TRANSIT: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
-  OUT_FOR_DELIVERY: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",
-  DELIVERED: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  PICKED_UP:
+    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+  IN_TRANSIT:
+    "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
+  OUT_FOR_DELIVERY:
+    "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",
+  DELIVERED:
+    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
   CANCELLED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
   RETURNED: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
 };
@@ -101,40 +110,50 @@ export default function MyParcels() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [editingParcel, setEditingParcel] = useState<string | null>(null);
-  const [updatedParcelData, setUpdatedParcelData] = useState<Partial<IParcel> | null>(null);
+  const [updatedParcelData, setUpdatedParcelData] =
+    useState<Partial<IParcel> | null>(null);
   const [parcels, setParcels] = useState<IParcel[]>([]);
 
-  const { data: parcelsResponse, isLoading, error, refetch } = useGetParcelQuery(undefined);
+  const {
+    data: parcelsResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetParcelQuery(undefined);
   const [updateParcel] = useUpdateParcelMutation();
   const [cancelParcel] = useCancelParcelMutation();
 
   useEffect(() => {
     if (parcelsResponse) {
-      console.log('Raw API response:', parcelsResponse);
-      
+      console.log("Raw API response:", parcelsResponse);
+
       // Handle different possible response structures
       if (Array.isArray(parcelsResponse)) {
         setParcels(parcelsResponse);
       } else if (parcelsResponse.data && Array.isArray(parcelsResponse.data)) {
         setParcels(parcelsResponse.data);
-      } else if (parcelsResponse.success && Array.isArray(parcelsResponse.data)) {
+      } else if (
+        parcelsResponse.success &&
+        Array.isArray(parcelsResponse.data)
+      ) {
         setParcels(parcelsResponse.data);
       } else {
-        console.warn('Unexpected API response structure:', parcelsResponse);
+        console.warn("Unexpected API response structure:", parcelsResponse);
         setParcels([]);
       }
     }
   }, [parcelsResponse]);
 
   const filteredParcels = parcels.filter((parcel: IParcel) => {
-    const matchesSearch = 
+    const matchesSearch =
       parcel.trackingId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       parcel.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       parcel.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       parcel.receiverAddress.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === "all" || parcel.currentStatus === statusFilter;
-    
+
+    const matchesStatus =
+      statusFilter === "all" || parcel.currentStatus === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
@@ -160,7 +179,7 @@ export default function MyParcels() {
     try {
       await updateParcel({
         parcelId,
-        parcelInfo: updatedParcelData
+        parcelInfo: updatedParcelData,
       }).unwrap();
 
       toast.success("Parcel updated successfully");
@@ -189,7 +208,7 @@ export default function MyParcels() {
 
     setUpdatedParcelData({
       ...updatedParcelData,
-      [field]: value
+      [field]: value,
     });
   };
 
@@ -199,17 +218,17 @@ export default function MyParcels() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
- if (error) {
-    console.error('Error loading parcels:', error);
+  if (error) {
+    console.error("Error loading parcels:", error);
     return (
       <div className="min-h-screen p-6">
         <Card>
@@ -218,7 +237,7 @@ export default function MyParcels() {
               <AlertCircle className="h-12 w-12 mx-auto mb-4" />
               <h3 className="text-lg font-semibold">Error loading parcels</h3>
               <p className="mt-2">
-                {(error as any)?.data?.message || 'Please try again later.'}
+                {(error as any)?.data?.message || "Please try again later."}
               </p>
             </div>
             <div className="flex justify-center mt-4">
@@ -231,9 +250,9 @@ export default function MyParcels() {
   }
 
   // Debug information in development
-  if (process.env.NODE_ENV === 'development' && !isLoading) {
-    console.log('Processed parcels:', parcels);
-    console.log('Filtered parcels:', filteredParcels);
+  if (process.env.NODE_ENV === "development" && !isLoading) {
+    // console.log('Processed parcels:', parcels);
+    // console.log('Filtered parcels:', filteredParcels);
   }
 
   return (
@@ -288,7 +307,9 @@ export default function MyParcels() {
                 <SelectItem value="CONFIRMED">Confirmed</SelectItem>
                 <SelectItem value="PICKED_UP">Picked Up</SelectItem>
                 <SelectItem value="IN_TRANSIT">In Transit</SelectItem>
-                <SelectItem value="OUT_FOR_DELIVERY">Out for Delivery</SelectItem>
+                <SelectItem value="OUT_FOR_DELIVERY">
+                  Out for Delivery
+                </SelectItem>
                 <SelectItem value="DELIVERED">Delivered</SelectItem>
                 <SelectItem value="CANCELLED">Cancelled</SelectItem>
               </SelectContent>
@@ -349,23 +370,34 @@ export default function MyParcels() {
                           <div className="space-y-2">
                             <Input
                               value={updatedParcelData?.title || ""}
-                              onChange={(e) => handleInputChange("title", e.target.value)}
+                              onChange={(e) =>
+                                handleInputChange("title", e.target.value)
+                              }
                               placeholder="Title"
                             />
                             <Input
                               value={updatedParcelData?.description || ""}
-                              onChange={(e) => handleInputChange("description", e.target.value)}
+                              onChange={(e) =>
+                                handleInputChange("description", e.target.value)
+                              }
                               placeholder="Description"
                             />
                             <Input
                               value={updatedParcelData?.type || ""}
-                              onChange={(e) => handleInputChange("type", e.target.value)}
+                              onChange={(e) =>
+                                handleInputChange("type", e.target.value)
+                              }
                               placeholder="Type"
                             />
                             <Input
                               type="number"
                               value={updatedParcelData?.weightKg || ""}
-                              onChange={(e) => handleInputChange("weightKg", parseFloat(e.target.value))}
+                              onChange={(e) =>
+                                handleInputChange(
+                                  "weightKg",
+                                  parseFloat(e.target.value)
+                                )
+                              }
                               placeholder="Weight (kg)"
                             />
                           </div>
@@ -377,7 +409,9 @@ export default function MyParcels() {
                             </div>
                             <div className="flex items-center gap-2 text-sm">
                               <FileText className="h-3 w-3" />
-                              <span className="text-muted-foreground">{parcel.description}</span>
+                              <span className="text-muted-foreground">
+                                {parcel.description}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2 text-sm">
                               <span>Type: {parcel.type}</span>
@@ -396,18 +430,27 @@ export default function MyParcels() {
                         {editingParcel === parcel._id ? (
                           <Input
                             value={updatedParcelData?.receiverAddress || ""}
-                            onChange={(e) => handleInputChange("receiverAddress", e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange(
+                                "receiverAddress",
+                                e.target.value
+                              )
+                            }
                             placeholder="Receiver Address"
                           />
                         ) : (
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <MapPin className="h-3 w-3" />
-                              <span className="text-sm">From: {parcel.senderAddress}</span>
+                              <span className="text-sm">
+                                From: {parcel.senderAddress}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
                               <MapPin className="h-3 w-3" />
-                              <span className="text-sm">To: {parcel.receiverAddress}</span>
+                              <span className="text-sm">
+                                To: {parcel.receiverAddress}
+                              </span>
                             </div>
                             {parcel.deliveredAt && (
                               <div className="flex items-center gap-2 text-sm text-green-600">
@@ -466,24 +509,27 @@ export default function MyParcels() {
                           </div>
                         ) : (
                           <div className="flex items-center justify-end gap-2">
-                            {parcel.currentStatus === "PENDING" && !parcel.isCancelled && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleEditParcel(parcel)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => handleCancelParcel(parcel._id)}
-                                >
-                                  <Ban className="h-4 w-4" />
-                                </Button>
-                              </>
-                            )}
+                            {parcel.currentStatus === "PENDING" &&
+                              !parcel.isCancelled && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleEditParcel(parcel)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() =>
+                                      handleCancelParcel(parcel._id)
+                                    }
+                                  >
+                                    <Ban className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
                           </div>
                         )}
                       </TableCell>

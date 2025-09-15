@@ -26,10 +26,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <Link to="/" className="text-foreground hover:text-foreground/90 ml-4">
-          <div className="flex items-center justify-baseline space-x-6">
+        <Link to="/" className="text-primary hover:text-primary/90 ml-4">
+          <div className="flex items-center justify-baseline space-x-3 font-story">
             <img src={Logo} alt="Parcelo Logo" className="h-8 w-auto" />
-            <p className="text-2xl font-bold">Parcelo</p>
+            <p className="text-4xl font-bold">Parcelo</p>
           </div>
         </Link>
       </SidebarHeader>

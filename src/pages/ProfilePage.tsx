@@ -8,6 +8,7 @@ import { useNavigate } from "react-router";
 import { motivationalQuotes } from "@/constants/motivationalQuotes";
 import { coverImages } from "@/constants/coverImages";
 import { UpdateProfileModal } from "@/components/modules/UpdateProfileModal";
+import { role } from "@/constants/role"; // Import your role constants
 
 export default function ProfilePage() {
   const { data, isLoading } = useUserInfoQuery(undefined);
@@ -32,6 +33,7 @@ export default function ProfilePage() {
   }
 
   const user = data?.data;
+  const isSender = user?.role === role.sender; // Check if user is a sender
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
@@ -46,12 +48,14 @@ export default function ProfilePage() {
         {/* Action Buttons */}
         <div className="absolute top-3 right-3 sm:top-4 sm:right-6 flex gap-2 sm:gap-3 flex-wrap justify-end">
           <UpdateProfileModal />
-          <Button
-            onClick={() => navigate("/parcel/create")}
-            className="rounded-xl shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg text-foreground text-sm sm:text-base"
-          >
-            Create Parcel
-          </Button>
+          {isSender && ( // Only show Create Parcel button for senders
+            <Button
+              onClick={() => navigate("/parcel/create")}
+              className="rounded-xl shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg text-foreground text-sm sm:text-base"
+            >
+              Create Parcel
+            </Button>
+          )}
         </div>
       </div>
 

@@ -192,7 +192,10 @@ export default function Verify() {
             </CardDescription>
           </CardHeader>
           <CardFooter className="flex justify-end">
-            <Button onClick={handleSendOtp} className="w-[300px]">
+            <Button
+              onClick={handleSendOtp}
+              className="w-[300px] text-foreground cursor-pointer"
+            >
               Confirm
             </Button>
           </CardFooter>

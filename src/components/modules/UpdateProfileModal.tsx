@@ -105,7 +105,9 @@ export function UpdateProfileModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Update Profile</Button>
+        <Button variant="outline" className="cursor-pointer">
+          Update Profile
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[450px]">
         <DialogHeader>

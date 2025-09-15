@@ -9,6 +9,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
@@ -17,6 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRegisterMutation } from "@/redux/features/auth/auth.api";
 import { toast } from "sonner";
 import Password from "@/components/ui/Password";
+import { role } from "@/constants/role"; // Import your role constants
 
 const registerSchema = z
   .object({
@@ -27,6 +35,11 @@ const registerSchema = z
       })
       .max(50),
     email: z.email(),
+    role: z
+      .string()
+      .refine((val) => [role.sender, role.receiver].includes(val), {
+        message: "Please select a valid role",
+      }),
     password: z.string().min(8, { error: "Password is too short" }),
     confirmPassword: z
       .string()
@@ -49,6 +62,7 @@ export function RegisterForm({
     defaultValues: {
       name: "",
       email: "",
+      role: "",
       password: "",
       confirmPassword: "",
     },
@@ -58,6 +72,7 @@ export function RegisterForm({
     const userInfo = {
       name: data.name,
       email: data.email,
+      role: data.role,
       password: data.password,
     };
 
@@ -68,6 +83,7 @@ export function RegisterForm({
       navigate("/verify", { state: data.email });
     } catch (error) {
       console.error(error);
+      toast.error("Failed to create account. Please try again.");
     }
   };
 
@@ -99,6 +115,7 @@ export function RegisterForm({
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="email"
@@ -113,12 +130,41 @@ export function RegisterForm({
                     />
                   </FormControl>
                   <FormDescription className="sr-only">
-                    This is your public display name.
+                    This is your email address.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your role" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={role.sender}>Sender</SelectItem>
+                      <SelectItem value={role.receiver}>Receiver</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Are you sending packages or receiving them?
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="password"
@@ -129,12 +175,13 @@ export function RegisterForm({
                     <Password {...field} />
                   </FormControl>
                   <FormDescription className="sr-only">
-                    This is your public display name.
+                    Enter a secure password.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="confirmPassword"
@@ -145,14 +192,18 @@ export function RegisterForm({
                     <Password {...field} />
                   </FormControl>
                   <FormDescription className="sr-only">
-                    This is your public display name.
+                    Confirm your password.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Submit
+
+            <Button
+              type="submit"
+              className="w-full text-foreground cursor-pointer"
+            >
+              Create Account
             </Button>
           </form>
         </Form>

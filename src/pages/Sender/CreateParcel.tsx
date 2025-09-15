@@ -69,9 +69,12 @@ export default function CreateParcel() {
   // Fetch current user info
   const { data: userInfo } = useUserInfoQuery(undefined);
 
-  // Fetch all users (you might need to adjust this based on your API)
-  const { data: allUsersData, isLoading: usersLoading } =
-    useGetAllUsersQuery(undefined);
+  // Fetch all users
+  const {
+    data: allUsersData,
+    isLoading: usersLoading,
+    error: usersError,
+  } = useGetAllUsersQuery(undefined);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -89,10 +92,15 @@ export default function CreateParcel() {
   });
 
   useEffect(() => {
+    console.log("All users data:", allUsersData);
+    console.log("User info:", userInfo);
+
     if (allUsersData?.data) {
+      // Filter users with RECEIVER role
       const receivers = allUsersData.data.filter(
         (user: User) => user.role === "RECEIVER"
       );
+      console.log("Receiver users:", receivers);
       setReceiverUsers(receivers);
     }
 
@@ -102,10 +110,19 @@ export default function CreateParcel() {
     }
   }, [allUsersData, userInfo, form]);
 
+  useEffect(() => {
+    if (usersError) {
+      console.error("Error fetching users:", usersError);
+      toast.error("Failed to load receiver list");
+    }
+  }, [usersError]);
+
   const handleReceiverChange = (userId: string) => {
     const selectedReceiver = receiverUsers.find((user) => user._id === userId);
     if (selectedReceiver && selectedReceiver.address) {
       form.setValue("receiverAddress", selectedReceiver.address);
+    } else {
+      form.setValue("receiverAddress", "");
     }
   };
 
@@ -134,7 +151,7 @@ export default function CreateParcel() {
         toast.success("Parcel created successfully", { id: toastId });
         form.reset();
         setImages([]);
-        navigate("/my-parcels");
+        navigate("/sender/parcel/my-parcels");
       } else {
         toast.error("Failed to create parcel", { id: toastId });
       }
@@ -280,11 +297,20 @@ export default function CreateParcel() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {receiverUsers.map((user) => (
-                            <SelectItem key={user._id} value={user._id}>
-                              {user.email} {user.name && `- ${user.name}`}
+                          {receiverUsers.length > 0 ? (
+                            receiverUsers.map((user) => (
+                              <SelectItem key={user._id} value={user._id}>
+                                {user.name || user.email}{" "}
+                                {user.email && `(${user.email})`}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="no-receivers" disabled>
+                              {usersLoading
+                                ? "Loading receivers..."
+                                : "No receivers found"}
                             </SelectItem>
-                          ))}
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -343,8 +369,9 @@ export default function CreateParcel() {
             type="submit"
             form="create-parcel-form"
             className="text-foreground"
+            disabled={usersLoading || receiverUsers.length === 0}
           >
-            Create Parcel
+            {usersLoading ? "Loading..." : "Create Parcel"}
           </Button>
         </CardFooter>
       </Card>

@@ -23,7 +23,7 @@ import { role } from "@/constants/role";
 
 // Navigation links array
 const navigationLinks = [
-  { href: "/", label: "Home", role: "PUBLIC" },
+  { href: "#", label: "Home", role: "PUBLIC" },
   { href: "#about", label: "About", role: "PUBLIC", isAnchor: true },
   { href: "#features", label: "Features", role: "PUBLIC", isAnchor: true },
   { href: "/contact-us", label: "Contact Us", role: "PUBLIC" },
@@ -123,37 +123,31 @@ export default function Navbar() {
             </Link>
             <NavigationMenu className="max-md:hidden">
               <NavigationMenuList className="gap-2">
-                {navigationLinks.map((link, index) => (
-                  <>
-                    {link.role === "PUBLIC" && (
-                      <NavigationMenuItem key={index}>
-                        <NavigationMenuLink
-                          asChild
-                          className="text-muted-foreground hover:text-primary py-1.5 font-medium"
+                {navigationLinks.map((link, index) => {
+                  // Filter links based on role
+                  const shouldShowLink =
+                    link.role === "PUBLIC" || link.role === data?.data?.role;
+
+                  if (!shouldShowLink) return null;
+
+                  return (
+                    <NavigationMenuItem key={index}>
+                      <NavigationMenuLink
+                        asChild
+                        className="text-muted-foreground hover:text-primary py-1.5 font-medium"
+                      >
+                        <Link
+                          to={link.href}
+                          onClick={(e) =>
+                            link.isAnchor && handleAnchorClick(e, link.href)
+                          }
                         >
-                          <Link
-                            to={link.href}
-                            onClick={(e) =>
-                              link.isAnchor && handleAnchorClick(e, link.href)
-                            }
-                          >
-                            {link.label}
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-                    {link.role === data?.data?.role && (
-                      <NavigationMenuItem key={index}>
-                        <NavigationMenuLink
-                          asChild
-                          className="text-muted-foreground hover:text-primary py-1.5 font-medium"
-                        >
-                          <Link to={link.href}>{link.label}</Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-                  </>
-                ))}
+                          {link.label}
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+                  );
+                })}
               </NavigationMenuList>
             </NavigationMenu>
           </div>

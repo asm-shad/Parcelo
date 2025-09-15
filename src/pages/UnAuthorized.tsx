@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Home,
   Shield,
@@ -7,6 +6,7 @@ import {
   User,
   ArrowLeft,
   Loader2,
+  Package,
 } from "lucide-react";
 import { role } from "@/constants/role";
 import { useLocation } from "react-router";
@@ -41,7 +41,9 @@ const UnAuthorized = () => {
   const getRequiredRoleForPath = () => {
     const path = location.pathname;
 
-    if (path.includes("/sender/")) {
+    if (path.includes("/sender/parcel/create")) {
+      return role.sender;
+    } else if (path.includes("/sender/")) {
       return role.sender;
     } else if (path.includes("/admin/")) {
       return role.admin;
@@ -54,14 +56,33 @@ const UnAuthorized = () => {
     return null;
   };
 
+  // Function to get specific resource name based on path
+  const getResourceName = () => {
+    const path = location.pathname;
+
+    if (path.includes("/sender/parcel/create")) {
+      return "Create Parcel";
+    } else if (path.includes("/sender/")) {
+      return "Sender Resources";
+    } else if (path.includes("/admin/")) {
+      return "Admin Panel";
+    } else if (path.includes("/receiver/")) {
+      return "Receiver Dashboard";
+    } else if (path.includes("/super-admin/")) {
+      return "Super Admin Console";
+    }
+
+    return "this resource";
+  };
+
   // Function to get role-specific message
   const getRoleSpecificMessage = (roleValue: string) => {
     const requiredRole = getRequiredRoleForPath();
 
     if (requiredRole) {
-      return `This resource requires ${getRoleDisplayName(
-        requiredRole
-      )} privileges.`;
+      return `Your current role (${getRoleDisplayName(
+        roleValue
+      )}) does not have access to ${getResourceName()}.`;
     }
 
     switch (roleValue) {
@@ -103,6 +124,7 @@ const UnAuthorized = () => {
   // Check if current path requires a specific role
   const requiredRole = getRequiredRoleForPath();
   const hasRequiredRole = requiredRole ? userRole === requiredRole : false;
+  const resourceName = getResourceName();
 
   // Show loading state
   if (isLoading) {
@@ -141,6 +163,19 @@ const UnAuthorized = () => {
               Access Denied
             </h1>
 
+            {/* Resource-specific message */}
+            {requiredRole && (
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-4 animate-slide-in-delay-1">
+                <div className="flex items-center">
+                  <Package className="h-5 w-5 text-blue-600 mr-2" />
+                  <span className="text-sm font-medium text-blue-800">
+                    Trying to access:{" "}
+                    <span className="font-bold">{resourceName}</span>
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Role-based message */}
             <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-4 animate-slide-in-delay-1">
               <div className="flex items-center">
@@ -160,11 +195,10 @@ const UnAuthorized = () => {
                 <div className="flex items-center">
                   <AlertCircle className="h-5 w-5 text-amber-600 mr-2" />
                   <span className="text-sm font-medium text-amber-800">
-                    This resource requires:{" "}
+                    Required role:{" "}
                     <span className="font-bold">
                       {getRoleDisplayName(requiredRole)}
-                    </span>{" "}
-                    role
+                    </span>
                   </span>
                 </div>
               </div>

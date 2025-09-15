@@ -5,18 +5,19 @@ import { role } from "@/constants/role";
 
 export default function HeroSection() {
   const navigate = useNavigate();
-  const { data: user, isLoading } = useUserInfoQuery(undefined);
+  const { data: userResponse, isLoading } = useUserInfoQuery(undefined);
 
   if (isLoading) {
-    // Optional: you can return a skeleton/loader or nothing until role is fetched
     return null;
   }
 
+  // Access the nested data property
+  const user = userResponse?.data;
   const userRole = user?.role;
 
   const handleSecondButtonClick = () => {
     if (!userRole) {
-      navigate("/sender/parcel/create"); // fallback for not logged-in users
+      navigate("/sender/parcel/create");
       return;
     }
 
@@ -46,7 +47,10 @@ export default function HeroSection() {
       : "Send a Package";
 
   return (
-    <section className="dark relative flex h-svh max-h-[1400px] w-svw overflow-hidden bg-[url('https://images.unsplash.com/photo-1591955506264-3f5a6834570a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center bg-no-repeat font-sans after:absolute after:left-0 after:top-0 after:z-10 after:h-full after:w-full after:bg-black/40 after:content-[''] md:h-svh">
+    <section
+      id="home"
+      className="dark relative flex h-svh max-h-[1400px] w-svw overflow-hidden bg-[url('https://images.unsplash.com/photo-1591955506264-3f5a6834570a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center bg-no-repeat font-sans after:absolute after:left-0 after:top-0 after:z-10 after:h-full after:w-full after:bg-black/40 after:content-[''] md:h-svh"
+    >
       <div className="relative z-30 m-auto flex max-w-[46.25rem] flex-col items-center justify-center gap-6 px-5">
         <h1 className="text-foreground text-center font-serif text-4xl leading-tight md:text-6xl xl:text-[4.4rem]">
           Fast, Secure & Reliable Parcel Delivery

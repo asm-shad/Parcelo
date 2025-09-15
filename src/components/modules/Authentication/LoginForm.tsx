@@ -101,7 +101,10 @@ export function LoginForm({
               )}
             />
 
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              className="w-full text-foreground cursor-pointer"
+            >
               Login
             </Button>
           </form>

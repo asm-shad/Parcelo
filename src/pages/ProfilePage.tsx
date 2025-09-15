@@ -8,13 +8,13 @@ import { useNavigate } from "react-router";
 import { motivationalQuotes } from "@/constants/motivationalQuotes";
 import { coverImages } from "@/constants/coverImages";
 import { UpdateProfileModal } from "@/components/modules/UpdateProfileModal";
-import { role } from "@/constants/role"; // Import your role constants
+import { role } from "@/constants/role";
 
 export default function ProfilePage() {
   const { data, isLoading } = useUserInfoQuery(undefined);
   const navigate = useNavigate();
 
-  const [cover, setCover] = useState("");
+  const [cover, setCover] = useState<string | null>(null);
   const [quote, setQuote] = useState("");
 
   useEffect(() => {
@@ -33,22 +33,26 @@ export default function ProfilePage() {
   }
 
   const user = data?.data;
-  const isSender = user?.role === role.sender; // Check if user is a sender
+  const isSender = user?.role === role.sender;
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       {/* Hero Section with Dynamic Image */}
       <div className="h-56 sm:h-64 w-full relative">
-        <img
-          src={cover}
-          alt="profile cover"
-          className="w-full h-full object-cover transition-all duration-700"
-        />
+        {cover ? (
+          <img
+            src={cover}
+            alt="profile cover"
+            className="w-full h-full object-cover transition-all duration-700"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-r from-blue-400 to-purple-500 animate-pulse" />
+        )}
 
         {/* Action Buttons */}
         <div className="absolute top-3 right-3 sm:top-4 sm:right-6 flex gap-2 sm:gap-3 flex-wrap justify-end">
           <UpdateProfileModal />
-          {isSender && ( // Only show Create Parcel button for senders
+          {isSender && (
             <Button
               onClick={() => navigate("/parcel/create")}
               className="rounded-xl shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg text-foreground text-sm sm:text-base"

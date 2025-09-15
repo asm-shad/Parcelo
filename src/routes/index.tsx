@@ -15,6 +15,8 @@ import type { TRole } from "@/types";
 import TrackParcel from "@/pages/TrackParcel";
 import Homepage from "@/pages/Homepage";
 import { ContactUs } from "@/pages/ContactUs";
+import UpdateParcel from "@/pages/Admin/UpdateParcel";
+import ParcelDetails from "@/pages/Admin/ParcelDetails";
 
 export const router = createBrowserRouter([
   {
@@ -48,6 +50,14 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/admin/analytics" /> },
       ...generateRoutes(adminSidebarItems),
+      {
+        path: "parcel/update/:id",
+        element: <UpdateParcel />,
+      },
+      {
+        path: "parcel/:id",
+        element: <ParcelDetails />,
+      },
     ],
   },
 

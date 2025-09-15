@@ -98,8 +98,18 @@ export default function ParcelManagement() {
     setFilteredParcels(result);
   }, [searchTerm, statusFilter, parcels]);
 
-  const handleEdit = (id: string) => {
-    navigate(`/admin/parcel/${id}`);
+  // const handleEdit = (id: string) => {
+  //   navigate(`/admin/parcel/${id}`);
+  // };
+
+  const handleAction = (parcelId: string, currentStatus: string) => {
+    if (currentStatus === ParcelStatus.Delivered) {
+      // Navigate to view/details page
+      navigate(`/admin/parcel/${parcelId}`);
+    } else {
+      // Navigate to edit/update page
+      navigate(`/admin/parcel/update/${parcelId}`);
+    }
   };
 
   if (error) {
@@ -260,7 +270,9 @@ export default function ParcelManagement() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEdit(parcel._id)}
+                          onClick={() =>
+                            handleAction(parcel._id, parcel.currentStatus)
+                          }
                           className={
                             parcel.currentStatus === ParcelStatus.Delivered
                               ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800"

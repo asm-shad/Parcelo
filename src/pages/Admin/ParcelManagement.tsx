@@ -21,6 +21,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 // Use a const object for status values
 const ParcelStatus = {
@@ -45,6 +53,19 @@ interface IParcel {
   currentStatus: string;
 }
 
+interface ParcelResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+  data: IParcel[];
+}
+
 const statusVariant: Record<
   string,
   "default" | "secondary" | "destructive" | "outline"
@@ -58,59 +79,58 @@ const statusVariant: Record<
   [ParcelStatus.Blocked]: "destructive",
 };
 
+// Custom debounce hook
+function useDebounce(value: string, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export default function ParcelManagement() {
   const navigate = useNavigate();
-  const [parcels, setParcels] = useState<IParcel[]>([]);
-  const [filteredParcels, setFilteredParcels] = useState<IParcel[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // Use getAllParcelsQuery for admin access
-  const { data, isLoading, error, refetch } = useGetAllParcelsQuery(undefined);
+  // Use custom debounce hook for search
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  useEffect(() => {
-    if (data) {
-      setParcels(data);
-      setFilteredParcels(data);
-    }
-  }, [data]);
+  // Use getAllParcelsQuery with filter parameters - UPDATED PARAMETER NAMES
+  const { data, isLoading, error, refetch } = useGetAllParcelsQuery({
+    page: currentPage,
+    limit,
+    searchTerm: debouncedSearchTerm || undefined, // Changed from 'search' to 'searchTerm'
+    currentStatus: statusFilter !== "all" ? statusFilter : undefined, // Changed from 'status' to 'currentStatus'
+  });
 
-  useEffect(() => {
-    let result = parcels;
-
-    // Apply search filter
-    if (searchTerm) {
-      result = result.filter(
-        (parcel) =>
-          parcel.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          parcel.trackingId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          parcel.receiverAddress
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply status filter
-    if (statusFilter !== "all") {
-      result = result.filter((parcel) => parcel.currentStatus === statusFilter);
-    }
-
-    setFilteredParcels(result);
-  }, [searchTerm, statusFilter, parcels]);
-
-  // const handleEdit = (id: string) => {
-  //   navigate(`/admin/parcel/${id}`);
-  // };
+  const parcelResponse = data as ParcelResponse;
+  const totalPage = parcelResponse?.meta?.totalPage || 1;
+  const parcelsData = parcelResponse?.data || [];
+  const totalItems = parcelResponse?.meta?.total || 0;
 
   const handleAction = (parcelId: string, currentStatus: string) => {
     if (currentStatus === ParcelStatus.Delivered) {
-      // Navigate to view/details page
       navigate(`/admin/parcel/${parcelId}`);
     } else {
-      // Navigate to edit/update page
       navigate(`/admin/parcel/update/${parcelId}`);
     }
   };
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm, statusFilter]);
 
   if (error) {
     return (
@@ -167,26 +187,41 @@ export default function ParcelManagement() {
             <span className="text-sm font-medium text-muted-foreground">
               Status:
             </span>
-            <div className="w-full md:w-1/3 flex items-center space-x-2">
-              <span className="text-sm font-medium text-muted-foreground">
-                Status:
-              </span>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="All Statuses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  {Object.values(ParcelStatus).map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                {Object.values(ParcelStatus).map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
+      </div>
+
+      {/* Results count */}
+      <div className="text-sm text-muted-foreground">
+        {isLoading ? (
+          "Loading parcels..."
+        ) : (
+          <>
+            Showing {parcelsData.length} of {totalItems} parcels
+            {(debouncedSearchTerm || statusFilter !== "all") && (
+              <span>
+                {" "}
+                (filtered by{" "}
+                {debouncedSearchTerm && `search: "${debouncedSearchTerm}"`}
+                {debouncedSearchTerm && statusFilter !== "all" && " and "}
+                {statusFilter !== "all" && `status: ${statusFilter}`})
+              </span>
+            )}
+          </>
+        )}
       </div>
 
       {/* Full-page Table */}
@@ -198,12 +233,12 @@ export default function ParcelManagement() {
                 <Skeleton key={i} className="h-12 w-full" />
               ))}
             </div>
-          ) : filteredParcels.length === 0 ? (
+          ) : parcelsData.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-muted-foreground text-lg">
-                {parcels.length === 0
-                  ? "No parcels found in the system."
-                  : "No parcels match your search criteria."}
+                {debouncedSearchTerm || statusFilter !== "all"
+                  ? "No parcels match your search criteria."
+                  : "No parcels found in the system."}
               </p>
               <Button
                 variant="outline"
@@ -217,78 +252,135 @@ export default function ParcelManagement() {
               </Button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table className="w-full">
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead className="font-semibold">Tracking ID</TableHead>
-                    <TableHead className="font-semibold">Title</TableHead>
-                    <TableHead className="font-semibold">Type</TableHead>
-                    <TableHead className="font-semibold">Weight (kg)</TableHead>
-                    <TableHead className="font-semibold">Fee</TableHead>
-                    <TableHead className="font-semibold">
-                      Receiver Address
-                    </TableHead>
-                    <TableHead className="font-semibold">Created At</TableHead>
-                    <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="font-semibold text-right">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredParcels.map((parcel) => (
-                    <TableRow key={parcel._id} className="hover:bg-muted/30">
-                      <TableCell className="font-mono text-sm">
-                        {parcel.trackingId}
-                      </TableCell>
-                      <TableCell className="font-medium max-w-xs truncate">
-                        {parcel.title}
-                      </TableCell>
-                      <TableCell className="capitalize">
-                        {parcel.type}
-                      </TableCell>
-                      <TableCell>{parcel.weightKg} kg</TableCell>
-                      <TableCell>${parcel.fee.toFixed(2)}</TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {parcel.receiverAddress}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {new Date(parcel.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            statusVariant[parcel.currentStatus] || "default"
-                          }
-                          className="whitespace-nowrap"
-                        >
-                          {parcel.currentStatus}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
+            <>
+              <div className="overflow-x-auto">
+                <Table className="w-full">
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="font-semibold">
+                        Tracking ID
+                      </TableHead>
+                      <TableHead className="font-semibold">Title</TableHead>
+                      <TableHead className="font-semibold">Type</TableHead>
+                      <TableHead className="font-semibold">
+                        Weight (kg)
+                      </TableHead>
+                      <TableHead className="font-semibold">Fee</TableHead>
+                      <TableHead className="font-semibold">
+                        Receiver Address
+                      </TableHead>
+                      <TableHead className="font-semibold">
+                        Created At
+                      </TableHead>
+                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="font-semibold text-right">
+                        Actions
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {parcelsData.map((parcel) => (
+                      <TableRow key={parcel._id} className="hover:bg-muted/30">
+                        <TableCell className="font-mono text-sm">
+                          {parcel.trackingId}
+                        </TableCell>
+                        <TableCell className="font-medium max-w-xs truncate">
+                          {parcel.title}
+                        </TableCell>
+                        <TableCell className="capitalize">
+                          {parcel.type}
+                        </TableCell>
+                        <TableCell>{parcel.weightKg} kg</TableCell>
+                        <TableCell>${parcel.fee.toFixed(2)}</TableCell>
+                        <TableCell className="max-w-xs truncate">
+                          {parcel.receiverAddress}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {new Date(parcel.createdAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              statusVariant[parcel.currentStatus] || "default"
+                            }
+                            className="whitespace-nowrap"
+                          >
+                            {parcel.currentStatus}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleAction(parcel._id, parcel.currentStatus)
+                            }
+                            className={
+                              parcel.currentStatus === ParcelStatus.Delivered
+                                ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800"
+                                : "bg-blue-50 text-foreground border-blue-200"
+                            }
+                          >
+                            {parcel.currentStatus === ParcelStatus.Delivered
+                              ? "View"
+                              : "Edit"}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Pagination */}
+              {totalPage > 1 && (
+                <div className="flex justify-end p-4 mt-4">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
                           onClick={() =>
-                            handleAction(parcel._id, parcel.currentStatus)
+                            setCurrentPage((prev) => Math.max(prev - 1, 1))
                           }
                           className={
-                            parcel.currentStatus === ParcelStatus.Delivered
-                              ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800"
-                              : "bg-blue-50 text-foreground border-blue-200"
+                            currentPage === 1
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
                           }
+                        />
+                      </PaginationItem>
+                      {Array.from(
+                        { length: totalPage },
+                        (_, index) => index + 1
+                      ).map((page) => (
+                        <PaginationItem
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
                         >
-                          {parcel.currentStatus === ParcelStatus.Delivered
-                            ? "View"
-                            : "Edit"}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                          <PaginationLink isActive={currentPage === page}>
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() =>
+                            setCurrentPage((prev) =>
+                              Math.min(prev + 1, totalPage)
+                            )
+                          }
+                          className={
+                            currentPage === totalPage
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

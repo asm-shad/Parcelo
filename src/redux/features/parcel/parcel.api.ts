@@ -33,12 +33,12 @@ export const parcelApi = baseApi.injectEndpoints({
       invalidatesTags: ["PARCEL"],
     }),
     getAllParcels: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: "/parcel",
         method: "GET",
+        params,
       }),
       providesTags: ["PARCEL"],
-      transformResponse: (res) => res.data,
     }),
     getParcelDetails: builder.query({
       query: (parcelId) => ({
@@ -84,12 +84,12 @@ export const parcelApi = baseApi.injectEndpoints({
 export const {
   useCreateParcelMutation,
   useGetParcelQuery,
-  useGetIncomingParcelsQuery, 
-  useConfirmDeliveryMutation, 
+  useGetIncomingParcelsQuery,
+  useConfirmDeliveryMutation,
   useUpdateParcelMutation,
   useUpdateParcelStatusMutation,
   useGetAllParcelsQuery,
   useGetParcelDetailsQuery,
   useTrackParcelQuery,
-  useCancelParcelMutation
+  useCancelParcelMutation,
 } = parcelApi;

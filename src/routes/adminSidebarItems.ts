@@ -1,10 +1,9 @@
-// import Analytics from "@/pages/Admin/Analytics";
-import ParcelManagement from "@/pages/Admin/ParcelManagement";
-import UserManagement from "@/pages/Admin/UserManagement";
 import type { ISidebarItem } from "@/types";
 import { lazy } from "react";
 
 const Analytics = lazy(() => import("@/pages/Admin/Analytics"));
+const ParcelManagement = lazy(() => import("@/pages/Admin/ParcelManagement"));
+const UserManagement = lazy(() => import("@/pages/Admin/UserManagement"));
 
 export const adminSidebarItems: ISidebarItem[] = [
   {

@@ -160,13 +160,13 @@ export default function Navbar() {
             <Button
               onClick={handleLogout}
               variant="outline"
-              className="text-sm cursor-pointer"
+              className="text-sm cursor-pointer text-foreground"
             >
               Logout
             </Button>
           )}
           {!data?.data?.email && (
-            <Button asChild className="text-sm cursor-pointer">
+            <Button asChild className="text-sm cursor-pointer text-foreground">
               <Link to="/login">Login</Link>
             </Button>
           )}

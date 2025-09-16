@@ -4,7 +4,6 @@ import {
   Lock,
   AlertCircle,
   User,
-  ArrowLeft,
   Loader2,
   Package,
 } from "lucide-react";
@@ -228,19 +227,19 @@ const UnAuthorized = () => {
             <div className="flex flex-col gap-3 animate-slide-in-delay-3">
               <button
                 onClick={() => (window.location.href = "/")}
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg flex items-center justify-center"
+                className="cursor-pointer w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg flex items-center justify-center"
               >
                 <Home className="h-5 w-5 mr-2" />
                 Return to Homepage
               </button>
 
-              <button
+              {/* <button
                 onClick={() => window.history.back()}
                 className="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center"
               >
                 <ArrowLeft className="h-5 w-5 mr-2" />
                 Go Back
-              </button>
+              </button> */}
 
               {/* Show login button for unauthenticated users */}
               {userRole === "UNAUTHENTICATED" && (

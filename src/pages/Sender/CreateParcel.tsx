@@ -368,7 +368,7 @@ export default function CreateParcel() {
           <Button
             type="submit"
             form="create-parcel-form"
-            className="text-foreground"
+            className="text-foreground cursor-pointer"
             disabled={usersLoading || receiverUsers.length === 0}
           >
             {usersLoading ? "Loading..." : "Create Parcel"}

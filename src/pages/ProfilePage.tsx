@@ -54,7 +54,7 @@ export default function ProfilePage() {
           <UpdateProfileModal />
           {isSender && (
             <Button
-              onClick={() => navigate("/parcel/create")}
+              onClick={() => navigate("/sender/parcel/create")}
               className="rounded-xl shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg text-foreground text-sm sm:text-base"
             >
               Create Parcel
